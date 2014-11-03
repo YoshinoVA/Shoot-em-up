@@ -6,6 +6,15 @@
 int backgroundWidth = 800;
 int backgroundHeight = 800;
 
+enum Gamestates
+{
+	Game,
+	Main,
+	HowTo,
+	Win,
+	Lose,
+};
+
 struct CircleCollision
 {
 	float radius = 0;
@@ -84,79 +93,109 @@ Enemy enemy;
 
 int main(int argc, char* argv[])
 {
-	Initialise(backgroundWidth, backgroundHeight, false, "Touhou 15.3");
+	Initialise(backgroundWidth, backgroundHeight, false, "Touhou 15.4683");
 
 	SetBackgroundColour(SColour(0, 0, 0, 255));
 
 	int Cirno = CreateSprite("./images/Cirno.png", 45, 50, true);
 	int Enemy1 = CreateSprite("./images/BlueFairy.png", 45, 50, true);
 	int background = CreateSprite("./images/background.png", 800, 800, true);
+	int Cover = CreateSprite("./images/GameCover.png", 800, 800, true);
+	int HowToCover = CreateSprite("./images/HowToCover.png", 800, 800, true);
 
 	float deltaTime;
+	Gamestates CurrentState = Main;
 	//Game Loop 
 	do
 	{
-		deltaTime = GetDeltaTime();
-		if (IsKeyDown('A'))
+		switch (CurrentState)
 		{
-			avatar.X -= 2.f;
-			if (avatar.X < 32.f)
-			{
-				avatar.X = 32.f;
-			}
-		}
-		if (IsKeyDown('D'))
-		{
-			avatar.X += 2.f;
-			if (avatar.X > 800 - 32.f)
-			{
-				avatar.X = 800 - 32.f;
-			}
-		}
-		if (IsKeyDown('W'))
-		{
-			avatar.Y += 2.f;
-			if (avatar.Y > 800 - 32.f)
-			{
-				avatar.Y = 800 - 32.f;
-			}
-		}
-		if (IsKeyDown('S'))
-		{
-			avatar.Y -= 2.f;
-			if (avatar.Y < 32.f)
-			{
-				avatar.Y = 32.f;
-			}
-		}
-		if (IsKeyDown('P'))
-		{
-			Bullet bullets;
-			bullets.x = avatar.X;
-			bullets.y = avatar.Y;
+		case Main:
+			MoveSprite(Cover, 400, 400);
+			DrawSprite(Cover);
 
-			avatar.AllBullets.push_back(bullets);
-		}
-
-		MoveSprite(background, 400, 400);
-		DrawSprite(background);
-
-		for (int i = 0; i < avatar.AllBullets.size(); i++)
-		{
-			float distance = sqrt(pow((avatar.AllBullets[i].x - enemy.X), 2) + pow(avatar.AllBullets[i].y - enemy.Y, 2));
-			avatar.AllBullets[i].SetSpeed(avatar.AllBullets[i].xSpeed, avatar.AllBullets[i].ySpeed);
-			if (distance < avatar.AllBullets[i].bulletCircle.radius + enemy.enemyCollision.radius)
+			if (IsKeyDown('Y'))
 			{
-				std::cout << "hit\n";
+				CurrentState = Game;
 			}
+			if (IsKeyDown('M'))
+			{
+				CurrentState = HowTo;
+			}
+			break;
+
+		case HowTo:
+			MoveSprite(HowToCover, 400, 400);
+			DrawSprite(HowToCover);
+			if (IsKeyDown(' '))
+			{
+				CurrentState = Main;
+			}
+			break;
+		case Game:
+			deltaTime = GetDeltaTime();
+			if (IsKeyDown('A'))
+			{
+				avatar.X -= 2.f;
+				if (avatar.X < 32.f)
+				{
+					avatar.X = 32.f;
+				}
+			}
+			if (IsKeyDown('D'))
+			{
+				avatar.X += 2.f;
+				if (avatar.X > 800 - 32.f)
+				{
+					avatar.X = 800 - 32.f;
+				}
+			}
+			if (IsKeyDown('W'))
+			{
+				avatar.Y += 2.f;
+				if (avatar.Y > 800 - 32.f)
+				{
+					avatar.Y = 800 - 32.f;
+				}
+			}
+			if (IsKeyDown('S'))
+			{
+				avatar.Y -= 2.f;
+				if (avatar.Y < 32.f)
+				{
+					avatar.Y = 32.f;
+				}
+			}
+			if (IsKeyDown('P'))
+			{
+				Bullet bullets;
+				bullets.x = avatar.X;
+				bullets.y = avatar.Y;
+
+				avatar.AllBullets.push_back(bullets);
+			}
+
+			MoveSprite(background, 400, 400);
+			DrawSprite(background);
+
+			for (int i = 0; i < avatar.AllBullets.size(); i++)
+			{
+				float distance = sqrt(pow((avatar.AllBullets[i].x - enemy.X), 2) + pow(avatar.AllBullets[i].y - enemy.Y, 2));
+				avatar.AllBullets[i].SetSpeed(avatar.AllBullets[i].xSpeed, avatar.AllBullets[i].ySpeed);
+				if (distance > avatar.AllBullets[i].bulletCircle.radius + enemy.enemyCollision.radius)
+				{
+					std::cout << "hit\n";
+
+				}
+			}
+
+			MoveSprite(Cirno, avatar.X, avatar.Y);
+			DrawSprite(Cirno);
+			MoveSprite(Enemy1, 400, 700);
+			DrawSprite(Enemy1);
+			ClearScreen();
+			break;
 		}
-
-		MoveSprite(Cirno, avatar.X, avatar.Y);
-		DrawSprite(Cirno);
-		MoveSprite(Enemy1, 400, 700);
-		DrawSprite(Enemy1);
-		ClearScreen();
-
 	} while (!FrameworkUpdate());
 
 	Shutdown();
