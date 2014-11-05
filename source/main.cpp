@@ -100,8 +100,6 @@ public:
 	float ySpeed = 100;
 	CircleCollision enemyCollision;
 
-	std::vector<Bullet*> AllBullets2;
-
 	void setCircle()
 	{
 		enemyCollision.radius = 25;
